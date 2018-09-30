@@ -1,6 +1,10 @@
 package main
 
-import "testing"
+import (
+	"bufio"
+	"os"
+	"testing"
+)
 
 func TestMakeNextLine(t *testing.T) {
 	testData := []struct {
@@ -45,6 +49,28 @@ func TestPatternType(t *testing.T) {
 		result := patternType(d.line)
 		if result != d.patternType {
 			t.Errorf("Wanted %s got %s for %q\n", d.patternType, result, d.line)
+		}
+	}
+}
+
+func BenchmarkMain(b *testing.B) {
+	patterns := []string{}
+	f, err := os.Open("patterns.txt")
+	if err != nil {
+		panic("Could not open patterns file")
+	}
+	defer f.Close()
+
+	scanner := bufio.NewScanner(f)
+	for scanner.Scan() {
+		pattern := scanner.Text()
+		patterns = append(patterns, pattern)
+	}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		for _, pattern := range patterns {
+			_ = patternType(pattern)
 		}
 	}
 }
